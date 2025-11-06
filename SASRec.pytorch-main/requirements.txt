@@ -1,0 +1,20 @@
+# SASRec PyTorch Requirements
+# Python 3.6+ required
+
+# Core dependencies
+numpy>=1.19.0
+
+# PyTorch - Choose one of the following:
+# 
+# Option 1: Install PyTorch with CUDA (recommended for GPU training)
+# Run this command instead of pip install -r requirements.txt:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#
+# Option 2: Install PyTorch CPU only
+# Run this command instead:
+# pip install torch torchvision torchaudio
+#
+# Option 3: Install default PyTorch (may not have CUDA support)
+# Uncomment the line below:
+# torch>=1.6.0
+

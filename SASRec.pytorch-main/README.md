@@ -82,5 +82,19 @@ year={2020}
 }
 ```
 
+local:
+git status
+git add .
+git commit -m "update"
+git push
+
+
+server:
+cd ~/jin/SASRec
+git pull
+cd ~/jin/SASRec/SASRec/SASRec.pytorch-main
+
+source venv/bin/activate
+deactivate
 
 python main.py --dataset=MIND --train_dir=default --device=cuda:0 --maxlen=200

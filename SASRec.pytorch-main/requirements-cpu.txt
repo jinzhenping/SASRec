@@ -1,0 +1,12 @@
+# SASRec PyTorch Requirements (CPU only)
+# Python 3.6+ required
+# For CPU-only training
+
+# Core dependencies
+numpy>=1.19.0
+
+# PyTorch CPU only
+torch>=1.6.0
+torchvision>=0.7.0
+torchaudio>=0.6.0
+
