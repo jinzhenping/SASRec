@@ -111,7 +111,7 @@ python python/prepare_news_dataset.py \
 head python/data/mind_new.txt
 
 # 3. 학습 실행
-python main.py --dataset=MIND --train_dir=default --gpu=0 --maxlen=200 --norm_first
+python python/main.py --dataset=mind_new --train_dir=default --gpu=0 --maxlen=200 --norm_first
 
 # 4. 결과 확인
 cat mind_new_default/log.txt
