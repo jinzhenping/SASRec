@@ -144,13 +144,15 @@ def evaluate(model, dataset, args):
     MRR = 0.0
     valid_user = 0.0
 
-    if usernum>10000:
-        users = random.sample(range(1, usernum + 1), 10000)
+    # 실제 존재하는 사용자 ID만 사용
+    valid_users = [u for u in train.keys() if u in test and len(train[u]) >= 1 and len(test[u]) >= 1]
+    
+    if len(valid_users) > 10000:
+        users = random.sample(valid_users, 10000)
     else:
-        users = range(1, usernum + 1)
+        users = valid_users
+    
     for u in users:
-
-        if len(train[u]) < 1 or len(test[u]) < 1: continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
@@ -213,12 +215,15 @@ def evaluate_valid(model, dataset, args):
     HR_10 = 0.0
     MRR = 0.0
     valid_user = 0.0
-    if usernum>10000:
-        users = random.sample(range(1, usernum + 1), 10000)
+    # 실제 존재하는 사용자 ID만 사용
+    valid_users = [u for u in train.keys() if u in valid and len(train[u]) >= 1 and len(valid[u]) >= 1]
+    
+    if len(valid_users) > 10000:
+        users = random.sample(valid_users, 10000)
     else:
-        users = range(1, usernum + 1)
+        users = valid_users
+    
     for u in users:
-        if len(train[u]) < 1 or len(valid[u]) < 1: continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
