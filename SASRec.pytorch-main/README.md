@@ -98,3 +98,22 @@ source venv/bin/activate
 deactivate
 
 python main.py --dataset=MIND --train_dir=default --device=cuda:0 --maxlen=200
+
+
+# 1. 데이터 전처리
+python python/prepare_news_dataset.py \
+    --input behaviors_new.tsv.tsv \
+    --output python/data/mind_new.txt
+
+# 2. 변환 결과 확인
+head python/data/mind_new.txt
+
+# 3. 학습 실행
+python python/main.py \
+    --dataset=mind_new \
+    --train_dir=default \
+    --device=cuda \
+    --maxlen=200
+
+# 4. 결과 확인
+cat mind_new_default/log.txt
