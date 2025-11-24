@@ -23,12 +23,24 @@ parser.add_argument('--num_epochs', default=1000, type=int)
 parser.add_argument('--num_heads', default=1, type=int)
 parser.add_argument('--dropout_rate', default=0.2, type=float)
 parser.add_argument('--l2_emb', default=0.0, type=float)
-parser.add_argument('--device', default='cuda', type=str)
+parser.add_argument('--device', default='cuda', type=str, 
+                    help='Device to use: "cuda", "cuda:0", "cuda:1", or "cpu"')
+parser.add_argument('--gpu', type=int, default=None,
+                    help='GPU device ID to use (e.g., 0, 1, 2). If specified, overrides --device')
 parser.add_argument('--inference_only', default=False, type=str2bool)
 parser.add_argument('--state_dict_path', default=None, type=str)
 parser.add_argument('--norm_first', action='store_true', default=False)
 
 args = parser.parse_args()
+
+# GPU 번호가 지정된 경우 device 설정
+if args.gpu is not None:
+    args.device = f'cuda:{args.gpu}'
+    print(f'Using GPU: {args.device}')
+elif args.device == 'cuda' and torch.cuda.is_available():
+    # GPU 번호가 지정되지 않고 기본 'cuda'인 경우, 첫 번째 GPU 사용
+    args.device = 'cuda:0'
+    print(f'Using default GPU: {args.device}')
 if not os.path.isdir(args.dataset + '_' + args.train_dir):
     os.makedirs(args.dataset + '_' + args.train_dir)
 with open(os.path.join(args.dataset + '_' + args.train_dir, 'args.txt'), 'w') as f:
