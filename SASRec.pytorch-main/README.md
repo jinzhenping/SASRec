@@ -103,7 +103,7 @@ python main.py --dataset=MIND --train_dir=default --device=cuda:0 --maxlen=200
 # 1. 데이터 전처리
 python python/prepare_news_dataset.py \
     --input behaviors_new.tsv \
-    --output data/mind_new.txt \
+    --output python/data/mind_new.txt \
     --remove_n_prefix \
     --keep_original_user_ids
 
