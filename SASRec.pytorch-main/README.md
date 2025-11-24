@@ -92,7 +92,7 @@ git push
 server:
 cd ~/jin/SASRec
 git pull
-cd ~/jin/SASRec/SASRec/SASRec.pytorch-main
+cd ~/jin/SASRec/SASRec/SASRec.pytorch-main/python
 
 source venv/bin/activate
 deactivate
@@ -111,7 +111,7 @@ python python/prepare_news_dataset.py \
 head python/data/mind_new.txt
 
 # 3. 학습 실행
-python python/main.py --dataset=mind_new --train_dir=default --gpu=0 --maxlen=200 --norm_first
+python main.py --dataset=mind_new --train_dir=default --gpu=0 --maxlen=200 --norm_first
 
 # 4. 결과 확인
 cat mind_new_default/log.txt

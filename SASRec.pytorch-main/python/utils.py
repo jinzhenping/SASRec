@@ -33,8 +33,10 @@ def random_neq(l, r, s):
 def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, SEED):
     def sample(uid):
 
-        # uid = np.random.randint(1, usernum + 1)
-        while len(user_train[uid]) <= 1: uid = np.random.randint(1, usernum + 1)
+        # uid가 user_train에 없거나 시퀀스 길이가 1 이하인 경우 재선택
+        while uid not in user_train or len(user_train[uid]) <= 1:
+            # 실제 존재하는 사용자 ID 중에서만 선택
+            uid = np.random.choice(valid_user_ids)
 
         seq = np.zeros([maxlen], dtype=np.int32)
         pos = np.zeros([maxlen], dtype=np.int32)
@@ -54,14 +56,19 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         return (uid, seq, pos, neg)
 
     np.random.seed(SEED)
-    uids = np.arange(1, usernum+1, dtype=np.int32)
+    # 실제 존재하는 사용자 ID만 사용 (시퀀스 길이가 2 이상인 사용자만)
+    valid_user_ids = np.array([uid for uid in user_train.keys() if len(user_train[uid]) > 1], dtype=np.int32)
+    if len(valid_user_ids) == 0:
+        raise ValueError("No valid users with sequence length > 1")
+    
+    uids = valid_user_ids.copy()
     counter = 0
     while True:
-        if counter % usernum == 0:
+        if counter % len(uids) == 0:
             np.random.shuffle(uids)
         one_batch = []
         for i in range(batch_size):
-            one_batch.append(sample(uids[counter % usernum]))
+            one_batch.append(sample(uids[counter % len(uids)]))
             counter += 1
         result_queue.put(zip(*one_batch))
 
