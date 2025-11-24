@@ -19,13 +19,15 @@
 import argparse
 from collections import defaultdict, OrderedDict
 
-def convert_news_to_sasrec(input_file, output_file):
+def convert_news_to_sasrec(input_file, output_file, keep_original_user_ids=False, remove_n_prefix=False):
     """
     뉴스 히스토리 데이터를 SASRec 형식으로 변환
     
     Args:
         input_file: 입력 파일 경로 (TSV 형식)
         output_file: 출력 파일 경로 (data/ 폴더에 저장)
+        keep_original_user_ids: True면 원본 사용자 ID 유지, False면 1부터 시작하는 새 ID로 매핑
+        remove_n_prefix: True면 아이템 ID에서 "N" 접두사 제거 (예: N39011 → 39011)
     """
     print(f"입력 파일 읽는 중: {input_file}")
     
@@ -65,21 +67,60 @@ def convert_news_to_sasrec(input_file, output_file):
             for item in items:
                 item = item.strip()
                 if item:  # 빈 문자열이 아닌 경우만
-                    user_sequences[user_id].append(item)
-                    all_items.add(item)
+                    # "N" 접두사 제거 옵션
+                    if remove_n_prefix and item.startswith('N'):
+                        # N39011 → 39011
+                        try:
+                            item_id = int(item[1:])  # 첫 글자 제거 후 정수 변환
+                            processed_item = str(item_id)
+                        except ValueError:
+                            # 숫자로 변환 실패 시 원본 유지
+                            processed_item = item
+                    else:
+                        processed_item = item
+                    
+                    user_sequences[user_id].append(processed_item)
+                    all_items.add(processed_item)
     
     print(f"  - 총 사용자 수: {len(user_sequences)}")
     print(f"  - 총 고유 아이템 수: {len(all_items)}")
     
-    # 아이템 ID를 1부터 시작하는 연속된 정수로 매핑
+    # 아이템 ID 처리
     unique_items = sorted(all_items)  # 정렬하여 일관된 매핑 보장
-    item_map = {item: idx + 1 for idx, item in enumerate(unique_items)}
     
-    # 사용자 ID를 1부터 시작하는 연속된 정수로 매핑 (필요한 경우)
+    if remove_n_prefix:
+        # "N" 접두사가 제거된 경우, 숫자 ID를 그대로 사용
+        # 단, 1부터 시작하지 않을 수 있으므로 확인 필요
+        item_map = {}
+        numeric_items = []
+        for item in unique_items:
+            try:
+                item_id = int(item)
+                item_map[item] = item_id  # 원본 숫자 ID 그대로 사용
+                numeric_items.append(item_id)
+            except ValueError:
+                # 숫자가 아닌 경우 기존 방식으로 매핑
+                item_map[item] = len(item_map) + 1
+        
+        print(f"  - 아이템 ID에서 'N' 접두사 제거됨")
+        if numeric_items:
+            print(f"  - 아이템 ID 범위: {min(numeric_items)} ~ {max(numeric_items)}")
+    else:
+        # 아이템 ID를 1부터 시작하는 연속된 정수로 매핑
+        item_map = {item: idx + 1 for idx, item in enumerate(unique_items)}
+    
+    # 사용자 ID 처리
     unique_users = sorted(user_sequences.keys())
-    user_map = {old_id: new_id for new_id, old_id in enumerate(unique_users, start=1)}
+    if keep_original_user_ids:
+        # 원본 사용자 ID 유지 (그대로 사용)
+        user_map = {old_id: old_id for old_id in unique_users}
+        print(f"  - 원본 사용자 ID 유지 (총 {len(user_map)}명)")
+        print(f"  - 사용자 ID 범위: {min(unique_users)} ~ {max(unique_users)}")
+    else:
+        # 사용자 ID를 1부터 시작하는 연속된 정수로 매핑
+        user_map = {old_id: new_id for new_id, old_id in enumerate(unique_users, start=1)}
+        print(f"  - 매핑된 사용자 수: {len(user_map)}")
     
-    print(f"  - 매핑된 사용자 수: {len(user_map)}")
     print(f"  - 매핑된 아이템 수: {len(item_map)}")
     
     # 변환된 데이터 쓰기
@@ -130,8 +171,12 @@ if __name__ == '__main__':
                        help='입력 파일 경로 (TSV 형식: user_id\\titem1 item2 ...)')
     parser.add_argument('--output', required=True, 
                        help='출력 파일 경로 (예: data/my_dataset.txt)')
+    parser.add_argument('--keep_original_user_ids', action='store_true', default=False,
+                       help='원본 사용자 ID를 그대로 유지 (기본값: False, 1부터 시작하는 새 ID로 매핑)')
+    parser.add_argument('--remove_n_prefix', action='store_true', default=False,
+                       help='아이템 ID에서 "N" 접두사 제거 (예: N39011 → 39011)')
     
     args = parser.parse_args()
     
-    convert_news_to_sasrec(args.input, args.output)
+    convert_news_to_sasrec(args.input, args.output, args.keep_original_user_ids, args.remove_n_prefix)
 
